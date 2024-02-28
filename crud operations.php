@@ -1,20 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+</head>
+<body>
+    <h1>User Management</h1>
+    <form action="process.php" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <input type="submit" value="Add User">
+    </form>
+</body>
+</html>
+
+
 <?php
 // Database connection
-$host = "localhost";
-$username = "your_username";
-$password = "your_password";
-$database = "your_database";
+$servername = "localhost";
+$username = "username";
+$password = "password";
+$database = "dbname";
 
-$conn = new mysqli($host, $username, $password, $database);
+$conn = new mysqli($servername, $username, $password, $database);
 
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Create operation
-function createProduct($conn, $name, $price) {
-    $sql = "INSERT INTO products (name, price) VALUES ('$name', '$price')";
+// CREATE operation
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && isset($_POST['email'])) {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+
+    $sql = "INSERT INTO users (name, email) VALUES ('$name', '$email')";
+
     if ($conn->query($sql) === TRUE) {
         echo "New record created successfully";
     } else {
@@ -22,23 +46,28 @@ function createProduct($conn, $name, $price) {
     }
 }
 
-// Read operation
-function readProducts($conn) {
-    $sql = "SELECT id, name, price FROM products";
+// READ operation
+if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['action']) && $_GET['action'] == 'read') {
+    $sql = "SELECT * FROM users";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            echo "id: " . $row["id"]. " - Name: " . $row["name"]. " - Price: " . $row["price"]. "<br>";
+            echo "ID: " . $row["id"]. " - Name: " . $row["name"]. " - Email: " . $row["email"]. "<br>";
         }
     } else {
         echo "0 results";
     }
 }
 
-// Update operation
-function updateProduct($conn, $id, $name, $price) {
-    $sql = "UPDATE products SET name='$name', price='$price' WHERE id=$id";
+// UPDATE operation
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+    $id = $_POST['id'];
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+
+    $sql = "UPDATE users SET name='$name', email='$email' WHERE id=$id";
+
     if ($conn->query($sql) === TRUE) {
         echo "Record updated successfully";
     } else {
@@ -46,9 +75,12 @@ function updateProduct($conn, $id, $name, $price) {
     }
 }
 
-// Delete operation
-function deleteProduct($conn, $id) {
-    $sql = "DELETE FROM products WHERE id=$id";
+// DELETE operation
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete'])) {
+    $id = $_POST['id'];
+
+    $sql = "DELETE FROM users WHERE id=$id";
+
     if ($conn->query($sql) === TRUE) {
         echo "Record deleted successfully";
     } else {
@@ -56,19 +88,8 @@ function deleteProduct($conn, $id) {
     }
 }
 
-// Example usage
-// Create a product
-createProduct($conn, "Product 1", 10.99);
-
-// Read all products
-readProducts($conn);
-
-// Update a product
-updateProduct($conn, 1, "Updated Product 1", 15.99);
-
-// Delete a product
-deleteProduct($conn, 1);
-
 // Close connection
 $conn->close();
 ?>
+
+
